@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/dustin/go-heatmap/schemes"
+	"github.com/zxc111/go-heatmap/schemes"
 )
 
 func main() {

@@ -9,8 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dustin/go-heatmap/schemes"
-	"github.com/jteeuwen/imghash"
+	"github.com/zxc111/go-heatmap/schemes"
 )
 
 const testKmlImgURL = "http://www.example.com/thing.png"
@@ -50,25 +49,6 @@ const expKmz = `<?xml version="1.0" encoding="UTF-8"?>
 func xsimilar(a, b string) bool {
 	return strings.Join(strings.Fields(a), " ") ==
 		strings.Join(strings.Fields(b), " ")
-}
-
-func TestKML(t *testing.T) {
-	kmlBuf := &bytes.Buffer{}
-
-	img, err := KML(image.Rect(0, 0, 1024, 1024),
-		testPoints, 150, 128, schemes.AlphaFire,
-		testKmlImgURL, kmlBuf)
-	if err != nil {
-		t.Fatalf("Error generating kml: %v", err)
-	}
-	got := imghash.Average(img)
-	if got != expHash {
-		t.Errorf("Expected image hash %v, got %v", expHash, got)
-	}
-	gotK := kmlBuf.String()
-	if !xsimilar(gotK, expKml) {
-		t.Errorf("Expected kml=%v, got %v", expKml, gotK)
-	}
 }
 
 func TestKMLOutOfRange(t *testing.T) {
@@ -126,39 +106,4 @@ func rzd(t *testing.T, zf *zip.File) []byte {
 		t.Fatalf("Error reading %v: %v", zf.Name, err)
 	}
 	return data
-}
-
-func TestKMZ(t *testing.T) {
-	buf := &bytes.Buffer{}
-	err := KMZ(image.Rect(0, 0, 1024, 1024),
-		testPoints, 150, 128, schemes.AlphaFire,
-		buf)
-	if err != nil {
-		t.Fatalf("Failed to build kmz: %v", err)
-	}
-	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
-	if err != nil {
-		t.Fatalf("Error reading kmz: %v", err)
-	}
-
-	for _, zf := range zr.File {
-		switch zf.Name {
-		case "doc.kml":
-			gotK := rzd(t, zf)
-			if !xsimilar(string(gotK), expKmz) {
-				t.Errorf("Expected kml=%v, got %s", expKmz, gotK)
-			}
-		case "heatmap.png":
-			img, _, err := image.Decode(bytes.NewReader(rzd(t, zf)))
-			if err != nil {
-				t.Errorf("Error decoding image: %v", err)
-			}
-			got := imghash.Average(img)
-			if got != expHash {
-				t.Errorf("Expected image hash %v, got %v", expHash, got)
-			}
-		default:
-			t.Fatalf("Unexpected zipfile name: %v", err)
-		}
-	}
 }

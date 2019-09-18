@@ -7,9 +7,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/dustin/go-heatmap/schemes"
-
-	"github.com/jteeuwen/imghash"
+	"github.com/zxc111/go-heatmap/schemes"
 )
 
 var testPoints = []DataPoint{}
@@ -57,14 +55,6 @@ func TestHeatmapKMLLimits(t *testing.T) {
 }
 
 const expHash = uint64(62624876249118208)
-
-func TestMkImage(t *testing.T) {
-	got := imghash.Average(Heatmap(image.Rect(0, 0, 1024, 1024),
-		testPoints, 150, 128, schemes.AlphaFire))
-	if got != expHash {
-		t.Errorf("Expected hash = %v, got %v", expHash, got)
-	}
-}
 
 func TestMust(t *testing.T) {
 	must(nil) // no panic
